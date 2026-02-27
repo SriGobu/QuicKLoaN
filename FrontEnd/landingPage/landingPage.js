@@ -123,10 +123,63 @@
 
     applThreePrevBtn?.addEventListener('click', () => show(applicationTwo));
 
+    // ── Live filename feedback for upload boxes ──
+    function setupUploadFeedback(inputId, statusId, boxId, iconId) {
+        const input  = document.getElementById(inputId);
+        const status = document.getElementById(statusId);
+        const box    = document.getElementById(boxId);
+        const icon   = document.getElementById(iconId);
+        if (!input) return;
+        input.addEventListener('change', function () {
+            if (this.files && this.files.length) {
+                const file = this.files[0];
+                status.textContent = file.name;
+                status.style.color = '#22c55e';
+                box.style.borderColor = '#22c55e';
+                icon.style.color = '#22c55e';
+            } else {
+                status.textContent = 'No file chosen';
+                status.style.color = '';
+                box.style.borderColor = '';
+                icon.style.color = '';
+            }
+        });
+    }
+    setupUploadFeedback('file-id',     'status-id',     'upload-box-id',     'upload-icon-id');
+    setupUploadFeedback('file-income', 'status-income', 'upload-box-income', 'upload-icon-income');
+
+    // ── Validate documents before submit ──
+    function validateDocuments() {
+        const fileId     = document.getElementById('file-id');
+        const fileIncome = document.getElementById('file-income');
+        const allowed    = ['image/jpeg','image/png','image/webp','image/gif','image/bmp','application/pdf'];
+
+        if (!fileId?.files.length) {
+            showLandingToast('Please upload your ID Proof before submitting.', 'warn'); return false;
+        }
+        if (!allowed.includes(fileId.files[0].type)) {
+            showLandingToast('ID Proof must be an image (JPG, PNG, WEBP) or PDF.', 'warn'); return false;
+        }
+        if (fileId.files[0].size < 1024) {
+            showLandingToast('ID Proof file appears empty. Please upload a valid document.', 'warn'); return false;
+        }
+        if (!fileIncome?.files.length) {
+            showLandingToast('Please upload your Income Proof before submitting.', 'warn'); return false;
+        }
+        if (!allowed.includes(fileIncome.files[0].type)) {
+            showLandingToast('Income Proof must be an image (JPG, PNG, WEBP) or PDF.', 'warn'); return false;
+        }
+        if (fileIncome.files[0].size < 1024) {
+            showLandingToast('Income Proof file appears empty. Please upload a valid document.', 'warn'); return false;
+        }
+        return true;
+    }
+
     applThreeSubmitBtn?.addEventListener('click', async () => {
         if (!document.getElementById('pan')?.value.trim()) {
-            alert('Please enter PAN / SSN.'); return;
+            showLandingToast('Please enter PAN / SSN.', 'warn'); return;
         }
+        if (!validateDocuments()) return;
 
         // ── Capture ALL form values NOW, before show() hides/resets anything ──
         const inp  = applOneForm?.querySelectorAll('input') || [];

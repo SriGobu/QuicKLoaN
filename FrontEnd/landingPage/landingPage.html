@@ -336,23 +336,25 @@
                         <input type="text" placeholder="ABCDE1234F" id="pan">
                     </div>
                 </div>
-                <div class="upload-box">
-                    <i class="bi bi-cloud-upload-fill"></i>
+                <div class="upload-box" id="upload-box-id">
+                    <i class="bi bi-cloud-upload-fill upload-icon" id="upload-icon-id"></i>
                     <p>Upload ID Proof</p>
-                    <span>PNG, JPG, PDF • Max 5MB</span>
-                    <input type="file" id="file-id" hidden>
+                    <span class="upload-hint">PNG, JPG, PDF • Max 5MB</span>
+                    <input type="file" id="file-id" accept="image/*,.pdf" hidden>
                     <label for="file-id" class="btn btn-ghost btn-sm">
                         <i class="bi bi-folder2-open"></i> Choose File
                     </label>
+                    <span class="upload-status" id="status-id">No file chosen</span>
                 </div>
-                <div class="upload-box">
-                    <i class="bi bi-cloud-upload-fill"></i>
+                <div class="upload-box" id="upload-box-income">
+                    <i class="bi bi-cloud-upload-fill upload-icon" id="upload-icon-income"></i>
                     <p>Upload Income Proof</p>
-                    <span>PNG, JPG, PDF • Max 5MB</span>
-                    <input type="file" id="file-income" hidden>
+                    <span class="upload-hint">PNG, JPG, PDF • Max 5MB</span>
+                    <input type="file" id="file-income" accept="image/*,.pdf" hidden>
                     <label for="file-income" class="btn btn-ghost btn-sm">
                         <i class="bi bi-folder2-open"></i> Choose File
                     </label>
+                    <span class="upload-status" id="status-income">No file chosen</span>
                 </div>
                 <div class="btn-row">
                     <button class="btn btn-ghost appl-three-previous-btn" id="appl-three-prvs-btn">
