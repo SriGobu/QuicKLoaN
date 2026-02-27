@@ -1,7 +1,5 @@
-// Load .env when running locally (ignored if vars already set by Docker / env_file)
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-}
+// Load .env — override: false means existing system env vars (e.g. from Docker / hosting panel) take precedence
+require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: false });
 
 const express    = require('express');
 const mongoose   = require('mongoose');

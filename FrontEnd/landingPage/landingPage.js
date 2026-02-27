@@ -163,7 +163,7 @@
         }
 
         try {
-            const res  = await fetch('http://localhost:3001/api/loan/apply', {
+            const res  = await fetch('https://www.quickloanapi.sg247.dev/api/loan/apply', {
                 method:  'POST',
                 mode: 'cors',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -764,7 +764,7 @@ async function payEMI(loanId, amount) {
     const token = localStorage.getItem('ql_token');
     if (!token) { showLandingToast('Please log in to make a payment.', 'warn'); return; }
     try {
-        const res = await fetch(`http://localhost:3001/api/loan/${loanId}/pay`, {
+        const res = await fetch(`https://www.quickloanapi.sg247.dev/api/loan/${loanId}/pay`, {
             method: 'POST',
             mode: 'cors',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -835,7 +835,7 @@ async function openHistoryModal() {
     // Fetch history
     let history = [];
     try {
-        const res  = await fetch('http://localhost:3001/api/loan/my/history', { 
+        const res  = await fetch('https://www.quickloanapi.sg247.dev/api/loan/my/history', { 
             mode: 'cors',
             headers: { 'Authorization': `Bearer ${token}` } 
         });
@@ -1003,7 +1003,7 @@ async function openHistoryModal() {
                 renderHomeLoansSection([]);
                 return;
             }
-            fetch('http://localhost:3001/api/loan/my', {
+            fetch('https://www.quickloanapi.sg247.dev/api/loan/my', {
                 mode: 'cors',
                 headers: { 'Authorization': `Bearer ${token}` }
             })

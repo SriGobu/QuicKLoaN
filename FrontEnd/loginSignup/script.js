@@ -18,7 +18,7 @@ togglePasswordButtons.forEach(button => {
 });
 
 // ── API BASE URL ─────────────────────────────────────────────────────────────
-const API_BASE = 'http://localhost:3001/api/auth';
+const API_BASE = 'https://www.quickloanapi.sg247.dev/api/auth';
 
 // ── SAVE SESSION ─────────────────────────────────────────────────────────────
 function saveSession(token, user) {

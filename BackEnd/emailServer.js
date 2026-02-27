@@ -1,8 +1,5 @@
-// NOTE: dotenv is loaded first by server.js before requiring this module.
-// Load .env only when running standalone (not inside Docker).
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config({ path: require('path').join(__dirname, '.env') });
-}
+// Load .env — override: false means existing system env vars take precedence
+require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: false });
 
 const nodemailer = require('nodemailer');
 
