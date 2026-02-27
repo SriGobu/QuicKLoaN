@@ -1,23 +1,31 @@
 // Load .env — override: false means existing system env vars take precedence
 require('dotenv').config({ path: require('path').join(__dirname, '.env'), override: false });
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// ── TRANSPORTER (lazy — built on first use so env vars are always resolved) ──
-let _transporter = null;
-function getTransporter() {
-    if (_transporter) return _transporter;
-    _transporter = nodemailer.createTransport({
-        host:   process.env.SMTP_HOST,
-        port:   Number(process.env.SMTP_PORT) || 587,
-        secure: false,
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-        },
-        tls: { rejectUnauthorized: false }
-    });
-    return _transporter;
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM_ADDRESS  = 'QuickLoan <no-reply@sg247.dev>';
+const SUPPORT_EMAIL = 'no-reply@sg247.dev';
+
+// ── CORE SEND HELPER ──────────────────────────────────────────────────────────
+async function sendEmail(to, subject, html) {
+    try {
+        const { data, error } = await resend.emails.send({
+            from:    FROM_ADDRESS,
+            to:      to,
+            subject: subject,
+            html:    html
+        });
+        if (error) {
+            console.error(`Email failed to ${to}:`, error.message);
+            return { success: false, error: error.message };
+        }
+        console.log(`Email sent to ${to} — id: ${data.id}`);
+        return { success: true, id: data.id };
+    } catch (err) {
+        console.error(`Email exception to ${to}:`, err.message);
+        return { success: false, error: err.message };
+    }
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -200,7 +208,7 @@ function buildHtml(data) {
             <p style="margin:0;font-size:12px;color:#465878;line-height:1.6;">
               ⚠️ <strong style="color:#7a90b8;">Important:</strong> Your first EMI will be collected 30 days from today. 
               Please ensure sufficient balance in your account. For any queries, contact 
-              <a href="mailto:${process.env.SMTP_FROM}" style="color:#4f8ef7;">${process.env.SMTP_FROM}</a>
+              <a href="mailto:${SUPPORT_EMAIL}" style="color:#4f8ef7;">${SUPPORT_EMAIL}</a>
             </p>
           </td>
         </tr>
@@ -225,29 +233,13 @@ function buildHtml(data) {
 </html>`;
 }
 
-// ── VERIFY SMTP ON STARTUP ────────────────────────────────────────────────────
-getTransporter().verify((err) => {
-    if (err) console.error('❌  SMTP connection failed:', err.message);
-    else     console.log('✅  SMTP server ready to send emails');
-});
-
-// ── EXPORTED FUNCTION ─────────────────────────────────────────────────────────
+// ── EXPORTED FUNCTIONS ───────────────────────────────────────────────────────
 async function sendLoanConfirmation(toEmail, loanData) {
-    const mailOptions = {
-        from:    `"QuickLoan" <${process.env.SMTP_FROM}>`,
-        to:      toEmail,
-        subject: `Loan Approved & ${fmtINR(loanData.loanAmount)} Credited — QuickLoan`,
-        html:    buildHtml(loanData)
-    };
-
-    try {
-        const info = await getTransporter().sendMail(mailOptions);
-        console.log(`Email sent to ${toEmail} — MessageId: ${info.messageId}`);
-        return { success: true, messageId: info.messageId };
-    } catch (err) {
-        console.error(`Email failed to ${toEmail}:`, err.message);
-        return { success: false, error: err.message };
-    }
+    return sendEmail(
+        toEmail,
+        `Loan Approved & ${fmtINR(loanData.loanAmount)} Credited — QuickLoan`,
+        buildHtml(loanData)
+    );
 }
 
 // ── PAYMENT RECEIPT EMAIL ─────────────────────────────────────────────────────
@@ -330,20 +322,11 @@ function buildPaymentReceiptHtml(d) {
 }
 
 async function sendPaymentReceipt(toEmail, data) {
-    const mailOptions = {
-        from:    `"QuickLoan" <${process.env.SMTP_FROM}>`,
-        to:      toEmail,
-        subject: `Payment Receipt — ${fmtINR(data.paidAmount)} Received (#${data.paymentNo}) — QuickLoan`,
-        html:    buildPaymentReceiptHtml(data)
-    };
-    try {
-        const info = await getTransporter().sendMail(mailOptions);
-        console.log(`Payment receipt sent to ${toEmail} — MessageId: ${info.messageId}`);
-        return { success: true };
-    } catch (err) {
-        console.error(`Payment receipt email failed:`, err.message);
-        return { success: false, error: err.message };
-    }
+    return sendEmail(
+        toEmail,
+        `Payment Receipt — ${fmtINR(data.paidAmount)} Received (#${data.paymentNo}) — QuickLoan`,
+        buildPaymentReceiptHtml(data)
+    );
 }
 
 // ── LOAN CLOSED EMAIL ─────────────────────────────────────────────────────────
@@ -427,20 +410,11 @@ function buildLoanClosedHtml(d) {
 }
 
 async function sendLoanClosedEmail(toEmail, data) {
-    const mailOptions = {
-        from:    `"QuickLoan" <${process.env.SMTP_FROM}>`,
-        to:      toEmail,
-        subject: `🎉 Loan Fully Repaid — ${fmtINR(data.loanAmount)} Cleared — QuickLoan`,
-        html:    buildLoanClosedHtml(data)
-    };
-    try {
-        const info = await getTransporter().sendMail(mailOptions);
-        console.log(`Loan closed email sent to ${toEmail} — MessageId: ${info.messageId}`);
-        return { success: true };
-    } catch (err) {
-        console.error(`Loan closed email failed:`, err.message);
-        return { success: false, error: err.message };
-    }
+    return sendEmail(
+        toEmail,
+        `🎉 Loan Fully Repaid — ${fmtINR(data.loanAmount)} Cleared — QuickLoan`,
+        buildLoanClosedHtml(data)
+    );
 }
 
 module.exports = { sendLoanConfirmation, sendPaymentReceipt, sendLoanClosedEmail };
