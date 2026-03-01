@@ -23,8 +23,8 @@ app.use(express.json());
 
 // ── DATABASE ──────────────────────────────────────────────────────────────────
 mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅  MongoDB connected'))
+    .connect(process.env.MONGODB_URI, { dbName: 'quickloan' })
+    .then(() => console.log('✅  MongoDB connected → quickloan'))
     .catch(err => console.error('❌  MongoDB error:', err.message));
 
 // ── USER SCHEMA ───────────────────────────────────────────────────────────────
